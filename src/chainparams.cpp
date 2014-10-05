@@ -33,7 +33,8 @@ public:
         pchMessageStart[1] = 0x5c;
         pchMessageStart[2] = 0x2d;
         pchMessageStart[3] = 0xba;
-        vAlertPubKey = ParseHex("04F04441C4757F356290A37C313C3772C5BC5003E898EB2E0CF365795543A7BF690C8BBBFA32EE3A3325477CE2000B7D0453EFBB203329D0F9DF34D5927D022BC9");
+        //vAlertPubKey = ParseHex("04F04441C4757F356290A37C313C3772C5BC5003E898EB2E0CF365795543A7BF690C8BBBFA32EE3A3325477CE2000B7D0453EFBB203329D0F9DF34D5927D022BC9");
+        vAlertPubKey = ParseHex("0244b8ec0f67de44252a7f1607362fd74fa3957f660022089f4d3e33ed68af4520");
         nDefaultPort = 11161;
         nRPCPort = 1161;
 	
@@ -70,7 +71,7 @@ public:
         assert(hashGenesisBlock == uint256("0x4d0c83a6df6e77f9a9830d6d0729b0207e95b722810210ea3f1eeea66b80a87a"));
         assert(genesis.hashMerkleRoot == uint256("0x95100de4d8e594464b59b09110c5990f1f09ac4e0e20b2fe8dd642f5b1128b9a"));
 
-        vSeeds.push_back(CDNSSeedData("54.186.223.183 seed #1", "54.186.223.183"));
+        vSeeds.push_back(CDNSSeedData("NAUT Multipool", "naut.icarusglider.com"));
         vSeeds.push_back(CDNSSeedData("54.187.101.97 seed #2", "54.187.101.97"));
 
         base58Prefixes[PUBKEY_ADDRESS] = list_of(53);
