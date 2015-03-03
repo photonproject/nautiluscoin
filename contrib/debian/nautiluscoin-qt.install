@@ -1,4 +1,4 @@
-nautiluscoin-qt usr/bin
+usr/local/bin/nautiluscoin-qt usr/bin
 share/pixmaps/nautiluscoin32.xpm usr/share/pixmaps
 share/pixmaps/nautiluscoin16.xpm usr/share/pixmaps
 share/pixmaps/nautiluscoin128.png usr/share/pixmaps

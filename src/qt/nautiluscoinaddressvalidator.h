@@ -2,8 +2,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef NAUTILUSCOINADDRESSVALIDATOR_H
-#define NAUTILUSCOINADDRESSVALIDATOR_H
+#ifndef NAUTILUSCOIN_QT_NAUTILUSCOINADDRESSVALIDATOR_H
+#define NAUTILUSCOIN_QT_NAUTILUSCOINADDRESSVALIDATOR_H
 
 #include <QValidator>
 
@@ -32,4 +32,4 @@ public:
     State validate(QString &input, int &pos) const;
 };
 
-#endif // NAUTILUSCOINADDRESSVALIDATOR_H
+#endif // NAUTILUSCOIN_QT_NAUTILUSCOINADDRESSVALIDATOR_H

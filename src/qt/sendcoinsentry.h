@@ -2,8 +2,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef SENDCOINSENTRY_H
-#define SENDCOINSENTRY_H
+#ifndef NAUTILUSCOIN_QT_SENDCOINSENTRY_H
+#define NAUTILUSCOIN_QT_SENDCOINSENTRY_H
 
 #include "walletmodel.h"
 
@@ -67,4 +67,4 @@ private:
     bool updateLabel(const QString &address);
 };
 
-#endif // SENDCOINSENTRY_H
+#endif // NAUTILUSCOIN_QT_SENDCOINSENTRY_H

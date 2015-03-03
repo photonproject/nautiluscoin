@@ -9,19 +9,191 @@
 #include "qvaluecombobox.h"
 
 #include <QApplication>
-#include <QDoubleSpinBox>
+#include <QAbstractSpinBox>
 #include <QHBoxLayout>
 #include <QKeyEvent>
-#include <qmath.h> // for qPow()
+#include <QLineEdit>
+
+/** QSpinBox that uses fixed-point numbers internally and uses our own
+ * formatting/parsing functions.
+ */
+class AmountSpinBox: public QAbstractSpinBox
+{
+    Q_OBJECT
+
+public:
+    explicit AmountSpinBox(QWidget *parent):
+        QAbstractSpinBox(parent),
+        currentUnit(NautiluscoinUnits::NAUT),
+        singleStep(100000) // satoshis
+    {
+        setAlignment(Qt::AlignRight);
+
+        connect(lineEdit(), SIGNAL(textEdited(QString)), this, SIGNAL(valueChanged()));
+    }
+
+    QValidator::State validate(QString &text, int &pos) const
+    {
+        if(text.isEmpty())
+            return QValidator::Intermediate;
+        bool valid = false;
+        parse(text, &valid);
+        /* Make sure we return Intermediate so that fixup() is called on defocus */
+        return valid ? QValidator::Intermediate : QValidator::Invalid;
+    }
+
+    void fixup(QString &input) const
+    {
+        bool valid = false;
+        CAmount val = parse(input, &valid);
+        if(valid)
+        {
+            input = NautiluscoinUnits::format(currentUnit, val, false, NautiluscoinUnits::separatorAlways);
+            lineEdit()->setText(input);
+        }
+    }
+
+    CAmount value(bool *valid_out=0) const
+    {
+        return parse(text(), valid_out);
+    }
+
+    void setValue(const CAmount& value)
+    {
+        lineEdit()->setText(NautiluscoinUnits::format(currentUnit, value, false, NautiluscoinUnits::separatorAlways));
+        emit valueChanged();
+    }
+
+    void stepBy(int steps)
+    {
+        bool valid = false;
+        CAmount val = value(&valid);
+        val = val + steps * singleStep;
+        val = qMin(qMax(val, CAmount(0)), NautiluscoinUnits::maxMoney());
+        setValue(val);
+    }
+
+    void setDisplayUnit(int unit)
+    {
+        bool valid = false;
+        CAmount val = value(&valid);
+
+        currentUnit = unit;
+
+        if(valid)
+            setValue(val);
+        else
+            clear();
+    }
+
+    void setSingleStep(const CAmount& step)
+    {
+        singleStep = step;
+    }
+
+    QSize minimumSizeHint() const
+    {
+        if(cachedMinimumSizeHint.isEmpty())
+        {
+            ensurePolished();
+
+            const QFontMetrics fm(fontMetrics());
+            int h = lineEdit()->minimumSizeHint().height();
+            int w = fm.width(NautiluscoinUnits::format(NautiluscoinUnits::NAUT, NautiluscoinUnits::maxMoney(), false, NautiluscoinUnits::separatorAlways));
+            w += 2; // cursor blinking space
+
+            QStyleOptionSpinBox opt;
+            initStyleOption(&opt);
+            QSize hint(w, h);
+            QSize extra(35, 6);
+            opt.rect.setSize(hint + extra);
+            extra += hint - style()->subControlRect(QStyle::CC_SpinBox, &opt,
+                                                    QStyle::SC_SpinBoxEditField, this).size();
+            // get closer to final result by repeating the calculation
+            opt.rect.setSize(hint + extra);
+            extra += hint - style()->subControlRect(QStyle::CC_SpinBox, &opt,
+                                                    QStyle::SC_SpinBoxEditField, this).size();
+            hint += extra;
+            hint.setHeight(h);
+
+            opt.rect = rect();
+
+            cachedMinimumSizeHint = style()->sizeFromContents(QStyle::CT_SpinBox, &opt, hint, this)
+                                    .expandedTo(QApplication::globalStrut());
+        }
+        return cachedMinimumSizeHint;
+    }
+
+private:
+    int currentUnit;
+    CAmount singleStep;
+    mutable QSize cachedMinimumSizeHint;
+
+    /**
+     * Parse a string into a number of base monetary units and
+     * return validity.
+     * @note Must return 0 if !valid.
+     */
+    CAmount parse(const QString &text, bool *valid_out=0) const
+    {
+        CAmount val = 0;
+        bool valid = NautiluscoinUnits::parse(currentUnit, text, &val);
+        if(valid)
+        {
+            if(val < 0 || val > NautiluscoinUnits::maxMoney())
+                valid = false;
+        }
+        if(valid_out)
+            *valid_out = valid;
+        return valid ? val : 0;
+    }
+
+protected:
+    bool event(QEvent *event)
+    {
+        if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease)
+        {
+            QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+            if (keyEvent->key() == Qt::Key_Comma)
+            {
+                // Translate a comma into a period
+                QKeyEvent periodKeyEvent(event->type(), Qt::Key_Period, keyEvent->modifiers(), ".", keyEvent->isAutoRepeat(), keyEvent->count());
+                return QAbstractSpinBox::event(&periodKeyEvent);
+            }
+        }
+        return QAbstractSpinBox::event(event);
+    }
+
+    StepEnabled stepEnabled() const
+    {
+        StepEnabled rv = 0;
+        if (isReadOnly()) // Disable steps when AmountSpinBox is read-only
+            return StepNone;
+        if(text().isEmpty()) // Allow step-up with empty field
+            return StepUpEnabled;
+        bool valid = false;
+        CAmount val = value(&valid);
+        if(valid)
+        {
+            if(val > 0)
+                rv |= StepDownEnabled;
+            if(val < NautiluscoinUnits::maxMoney())
+                rv |= StepUpEnabled;
+        }
+        return rv;
+    }
+
+signals:
+    void valueChanged();
+};
+
+#include "nautiluscoinamountfield.moc"
 
 NautiluscoinAmountField::NautiluscoinAmountField(QWidget *parent) :
     QWidget(parent),
-    amount(0),
-    currentUnit(-1)
+    amount(0)
 {
-    nSingleStep = 100000; // satoshis
-
-    amount = new QDoubleSpinBox(this);
+    amount = new AmountSpinBox(this);
     amount->setLocale(QLocale::c());
     amount->installEventFilter(this);
     amount->setMaximumWidth(170);
@@ -40,19 +212,11 @@ NautiluscoinAmountField::NautiluscoinAmountField(QWidget *parent) :
     setFocusProxy(amount);
 
     // If one if the widgets changes, the combined content changes as well
-    connect(amount, SIGNAL(valueChanged(QString)), this, SIGNAL(textChanged()));
+    connect(amount, SIGNAL(valueChanged()), this, SIGNAL(valueChanged()));
     connect(unit, SIGNAL(currentIndexChanged(int)), this, SLOT(unitChanged(int)));
 
     // Set default based on configuration
     unitChanged(unit->currentIndex());
-}
-
-void NautiluscoinAmountField::setText(const QString &text)
-{
-    if (text.isEmpty())
-        amount->clear();
-    else
-        amount->setValue(text.toDouble());
 }
 
 void NautiluscoinAmountField::clear()
@@ -61,18 +225,17 @@ void NautiluscoinAmountField::clear()
     unit->setCurrentIndex(0);
 }
 
+void NautiluscoinAmountField::setEnabled(bool fEnabled)
+{
+    amount->setEnabled(fEnabled);
+    unit->setEnabled(fEnabled);
+}
+
 bool NautiluscoinAmountField::validate()
 {
-    bool valid = true;
-    if (amount->value() == 0.0)
-        valid = false;
-    else if (!NautiluscoinUnits::parse(currentUnit, text(), 0))
-        valid = false;
-    else if (amount->value() > NautiluscoinUnits::maxAmount(currentUnit))
-        valid = false;
-
+    bool valid = false;
+    value(&valid);
     setValid(valid);
-
     return valid;
 }
 
@@ -84,31 +247,12 @@ void NautiluscoinAmountField::setValid(bool valid)
         amount->setStyleSheet(STYLE_INVALID);
 }
 
-QString NautiluscoinAmountField::text() const
-{
-    if (amount->text().isEmpty())
-        return QString();
-    else
-        return amount->text();
-}
-
 bool NautiluscoinAmountField::eventFilter(QObject *object, QEvent *event)
 {
     if (event->type() == QEvent::FocusIn)
     {
         // Clear invalid flag on focus
         setValid(true);
-    }
-    else if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease)
-    {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        if (keyEvent->key() == Qt::Key_Comma)
-        {
-            // Translate a comma into a period
-            QKeyEvent periodKeyEvent(event->type(), Qt::Key_Period, keyEvent->modifiers(), ".", keyEvent->isAutoRepeat(), keyEvent->count());
-            QApplication::sendEvent(object, &periodKeyEvent);
-            return true;
-        }
     }
     return QWidget::eventFilter(object, event);
 }
@@ -120,20 +264,14 @@ QWidget *NautiluscoinAmountField::setupTabChain(QWidget *prev)
     return unit;
 }
 
-qint64 NautiluscoinAmountField::value(bool *valid_out) const
+CAmount NautiluscoinAmountField::value(bool *valid_out) const
 {
-    qint64 val_out = 0;
-    bool valid = NautiluscoinUnits::parse(currentUnit, text(), &val_out);
-    if (valid_out)
-    {
-        *valid_out = valid;
-    }
-    return val_out;
+    return amount->value(valid_out);
 }
 
-void NautiluscoinAmountField::setValue(qint64 value)
+void NautiluscoinAmountField::setValue(const CAmount& value)
 {
-    setText(NautiluscoinUnits::format(currentUnit, value));
+    amount->setValue(value);
 }
 
 void NautiluscoinAmountField::setReadOnly(bool fReadOnly)
@@ -150,28 +288,7 @@ void NautiluscoinAmountField::unitChanged(int idx)
     // Determine new unit ID
     int newUnit = unit->itemData(idx, NautiluscoinUnits::UnitRole).toInt();
 
-    // Parse current value and convert to new unit
-    bool valid = false;
-    qint64 currentValue = value(&valid);
-
-    currentUnit = newUnit;
-
-    // Set max length after retrieving the value, to prevent truncation
-    amount->setDecimals(NautiluscoinUnits::decimals(currentUnit));
-    amount->setMaximum(qPow(10, NautiluscoinUnits::amountDigits(currentUnit)) - qPow(10, -amount->decimals()));
-    amount->setSingleStep((double)nSingleStep / (double)NautiluscoinUnits::factor(currentUnit));
-
-    if (valid)
-    {
-        // If value was valid, re-place it in the widget with the new unit
-        setValue(currentValue);
-    }
-    else
-    {
-        // If current value is invalid, just clear field
-        setText("");
-    }
-    setValid(true);
+    amount->setDisplayUnit(newUnit);
 }
 
 void NautiluscoinAmountField::setDisplayUnit(int newUnit)
@@ -179,8 +296,7 @@ void NautiluscoinAmountField::setDisplayUnit(int newUnit)
     unit->setValue(newUnit);
 }
 
-void NautiluscoinAmountField::setSingleStep(qint64 step)
+void NautiluscoinAmountField::setSingleStep(const CAmount& step)
 {
-    nSingleStep = step;
-    unitChanged(unit->currentIndex());
+    amount->setSingleStep(step);
 }

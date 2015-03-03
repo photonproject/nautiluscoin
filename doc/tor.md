@@ -1,4 +1,4 @@
-TOR SUPPORT IN BITCOIN
+TOR SUPPORT IN NAUTILUSCOIN
 ======================
 
 It is possible to run Nautiluscoin as a Tor hidden service, and connect to such services.
@@ -13,11 +13,6 @@ configure Tor.
 The first step is running Nautiluscoin behind a Tor proxy. This will already make all
 outgoing connections be anonymized, but more is possible.
 
-	-socks=5        SOCKS5 supports connecting-to-hostname, which can be used instead
-	                of doing a (leaking) local DNS lookup. SOCKS5 is the default,
-	                but SOCKS4 does not support this. (SOCKS4a does, but isn't
-	                implemented).
-	
 	-proxy=ip:port  Set the proxy server. If SOCKS5 is selected (default), this proxy
 	                server will be used to try to reach .onion addresses as well.
 	
@@ -47,11 +42,11 @@ reachable from the Tor network. Add these lines to your /etc/tor/torrc (or equiv
 config file):
 
 	HiddenServiceDir /var/lib/tor/nautiluscoin-service/
-	HiddenServicePort 8333 127.0.0.1:8333
-	HiddenServicePort 18333 127.0.0.1:18333
+	HiddenServicePort 11161 127.0.0.1:11161
+	HiddenServicePort 11162 127.0.0.1:11162
 
 The directory can be different of course, but (both) port numbers should be equal to
-your nautiluscoind's P2P listen port (8333 by default).
+your nautiluscoind's P2P listen port (11161 by default).
 
 	-externalip=X   You can tell nautiluscoin about its publicly reachable address using
 	                this option, and this can be a .onion address. Given the above
@@ -81,7 +76,7 @@ specify:
 
 	./nautiluscoind ... -discover
 
-and open port 8333 on your firewall (or use -upnp).
+and open port 11161 on your firewall (or use -upnp).
 
 If you only want to use Tor to reach onion addresses, but not use it as a proxy
 for normal IPv4/IPv6 communication, use:

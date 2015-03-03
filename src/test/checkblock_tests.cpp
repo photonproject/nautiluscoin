@@ -1,10 +1,16 @@
+// Copyright (c) 2013-2014 The Nautiluscoin Core developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 //
 // Unit tests for block.CheckBlock()
 //
 
 
 
+#include "clientversion.h"
 #include "main.h"
+#include "utiltime.h"
 
 #include <cstdio>
 
@@ -15,8 +21,7 @@
 
 BOOST_AUTO_TEST_SUITE(CheckBlock_tests)
 
-bool
-read_block(const std::string& filename, CBlock& block)
+bool read_block(const std::string& filename, CBlock& block)
 {
     namespace fs = boost::filesystem;
     fs::path testFile = fs::current_path() / "data" / filename;
@@ -31,8 +36,8 @@ read_block(const std::string& filename, CBlock& block)
 
     fseek(fp, 8, SEEK_SET); // skip msgheader/size
 
-    CAutoFile filein = CAutoFile(fp, SER_DISK, CLIENT_VERSION);
-    if (!filein) return false;
+    CAutoFile filein(fp, SER_DISK, CLIENT_VERSION);
+    if (filein.IsNull()) return false;
 
     filein >> block;
 
@@ -44,7 +49,7 @@ BOOST_AUTO_TEST_CASE(May15)
     // Putting a 1MB binary file in the git repository is not a great
     // idea, so this test is only run if you manually download
     // test/data/Mar12Fork.dat from
-    // http://sourceforge.net/projects/bitcoin/files/Nautiluscoin/blockchain/Mar12Fork.dat/download
+    // http://sourceforge.net/projects/nautiluscoin/files/Nautiluscoin/blockchain/Mar12Fork.dat/download
     unsigned int tMay15 = 1368576000;
     SetMockTime(tMay15); // Test as if it was right at May 15
 

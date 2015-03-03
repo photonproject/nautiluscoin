@@ -1,11 +1,11 @@
 Nautiluscoin-Qt version 0.8.4 is now available from:
-  http://sourceforge.net/projects/bitcoin/files/Bitcoin/bitcoin-0.8.4/
+  http://sourceforge.net/projects/nautiluscoin/files/Nautiluscoin/nautiluscoin-0.8.4/
 
 This is a maintenance release to fix a critical bug and three
 security issues; we urge all users to upgrade.
 
 Please report bugs using the issue tracker at github:
-  https://github.com/bitcoin/bitcoin/issues
+  https://github.com/nautiluscoin/nautiluscoin/issues
 
 
 How to Upgrade
@@ -34,7 +34,7 @@ Bloom filters were introduced with version 0.8, so versions 0.8.0
 through 0.8.3 are vulnerable to this critical denial-of-service attack.
 
 A constant-time algorithm is now used to check RPC password
-guess attempts; fixes https://github.com/bitcoin/bitcoin/issues/2838
+guess attempts; fixes https://github.com/nautiluscoin/nautiluscoin/issues/2838
 (CVE-2013-4165)
 
 Implement a better fix for the fill-memory-with-orphan-transactions

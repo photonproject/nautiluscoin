@@ -7,4 +7,4 @@
 
 extern void noui_connect();
 
-#endif
+#endif // NAUTILUSCOIN_NOUI_H

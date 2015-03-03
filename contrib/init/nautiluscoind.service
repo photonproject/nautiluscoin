@@ -1,0 +1,22 @@
+[Unit]
+Description=Nautiluscoin's distributed currency daemon
+After=network.target
+
+[Service]
+User=nautiluscoin
+Group=nautiluscoin
+
+Type=forking
+PIDFile=/var/lib/nautiluscoind/nautiluscoind.pid
+ExecStart=/usr/bin/nautiluscoind -daemon -pid=/var/lib/nautiluscoind/nautiluscoind.pid \
+-conf=/etc/nautiluscoin/nautiluscoin.conf -datadir=/var/lib/nautiluscoind -disablewallet
+
+Restart=always
+PrivateTmp=true
+TimeoutStopSec=60s
+TimeoutStartSec=2s
+StartLimitInterval=120s
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target

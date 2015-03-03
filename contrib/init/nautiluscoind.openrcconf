@@ -1,0 +1,27 @@
+# /etc/conf.d/nautiluscoind: config file for /etc/init.d/nautiluscoind
+
+# Config file location
+#NAUTILUSCOIND_CONFIGFILE="/etc/nautiluscoin/nautiluscoin.conf"
+
+# What directory to write pidfile to?  (created and owned by $NAUTILUSCOIND_USER)
+#NAUTILUSCOIND_PIDDIR="/var/run/nautiluscoind"
+
+# What filename to give the pidfile
+#NAUTILUSCOIND_PIDFILE="${NAUTILUSCOIND_PIDDIR}/nautiluscoind.pid"
+
+# Where to write nautiluscoind data (be mindful that the blockchain is large)
+#NAUTILUSCOIND_DATADIR="/var/lib/nautiluscoind"
+
+# User and group to own nautiluscoind process
+#NAUTILUSCOIND_USER="nautiluscoin"
+#NAUTILUSCOIND_GROUP="nautiluscoin"
+
+# Path to nautiluscoind executable
+#NAUTILUSCOIND_BIN="/usr/bin/nautiluscoind"
+
+# Nice value to run nautiluscoind under
+#NAUTILUSCOIND_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+NAUTILUSCOIND_OPTS="-disablewallet"
+

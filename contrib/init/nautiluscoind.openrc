@@ -1,0 +1,86 @@
+#!/sbin/runscript
+
+# backward compatibility for existing gentoo layout 
+#
+if [ -d "/var/lib/nautiluscoin/.nautiluscoin" ]; then
+	NAUTILUSCOIND_DEFAULT_DATADIR="/var/lib/nautiluscoin/.nautiluscoin"
+else
+	NAUTILUSCOIND_DEFAULT_DATADIR="/var/lib/nautiluscoind"
+fi
+
+NAUTILUSCOIND_CONFIGFILE=${NAUTILUSCOIND_CONFIGFILE:-/etc/nautiluscoin/nautiluscoin.conf}
+NAUTILUSCOIND_PIDDIR=${NAUTILUSCOIND_PIDDIR:-/var/run/nautiluscoind}
+NAUTILUSCOIND_PIDFILE=${NAUTILUSCOIND_PIDFILE:-${NAUTILUSCOIND_PIDDIR}/nautiluscoind.pid}
+NAUTILUSCOIND_DATADIR=${NAUTILUSCOIND_DATADIR:-${NAUTILUSCOIND_DEFAULT_DATADIR}}
+NAUTILUSCOIND_USER=${NAUTILUSCOIND_USER:-nautiluscoin}
+NAUTILUSCOIND_GROUP=${NAUTILUSCOIND_GROUP:-nautiluscoin}
+NAUTILUSCOIND_BIN=${NAUTILUSCOIND_BIN:-/usr/bin/nautiluscoind}
+
+name="Nautiluscoin Core Daemon"
+description="Nautiluscoin crypto-currency p2p network daemon"
+
+command="/usr/bin/nautiluscoind"
+command_args="-pid=\"${NAUTILUSCOIND_PIDFILE}\" \
+		-conf=\"${NAUTILUSCOIND_CONFIGFILE}\" \
+		-datadir=\"${NAUTILUSCOIND_DATADIR}\" \
+		-daemon \
+		${NAUTILUSCOIND_OPTS}"
+
+required_files="${NAUTILUSCOIND_CONFIGFILE}"
+start_stop_daemon_args="-u ${NAUTILUSCOIND_USER} \
+			-N ${NAUTILUSCOIND_NICE:-0} -w 2000"
+pidfile="${NAUTILUSCOIND_PIDFILE}"
+retry=60
+
+depend() {
+	need localmount net
+}
+
+# verify
+# 1) that the datadir exists and is writable (or create it)
+# 2) that a directory for the pid exists and is writable
+# 3) ownership and permissions on the config file
+start_pre() {
+	checkpath \
+	-d \
+	--mode 0750 \
+	--owner "${NAUTILUSCOIND_USER}:${NAUTILUSCOIND_GROUP}" \
+	"${NAUTILUSCOIND_DATADIR}"
+
+	checkpath \
+	-d \
+	--mode 0755 \
+	--owner "${NAUTILUSCOIND_USER}:${NAUTILUSCOIND_GROUP}" \
+	"${NAUTILUSCOIND_PIDDIR}"
+
+	checkpath -f \
+	-o ${NAUTILUSCOIND_USER}:${NAUTILUSCOIND_GROUP} \
+	-m 0660 \
+	${NAUTILUSCOIND_CONFIGFILE}
+
+	checkconfig || return 1
+}
+
+checkconfig()
+{
+	if ! grep -qs '^rpcpassword=' "${NAUTILUSCOIND_CONFIGFILE}" ; then
+		eerror ""
+		eerror "ERROR: You must set a secure rpcpassword to run nautiluscoind."
+		eerror "The setting must appear in ${NAUTILUSCOIND_CONFIGFILE}"
+		eerror ""
+		eerror "This password is security critical to securing wallets "
+		eerror "and must not be the same as the rpcuser setting."
+		eerror "You can generate a suitable random password using the following"
+		eerror "command from the shell:"
+		eerror ""
+		eerror "bash -c 'tr -dc a-zA-Z0-9 < /dev/urandom | head -c32 && echo'"
+		eerror ""
+		eerror "It is also recommended that you also set alertnotify so you are "
+		eerror "notified of problems:"
+		eerror ""
+		eerror "ie: alertnotify=echo %%s | mail -s \"Nautiluscoin Alert\"" \
+			"admin@foo.com"
+		eerror ""
+		return 1
+	fi
+}

@@ -1,6 +1,8 @@
+// Copyright (c) 2011-2013 The Nautiluscoin Core developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-
-#include "util.h"
+#include "utilstrencodings.h"
 
 #include <boost/test/unit_test.hpp>
 

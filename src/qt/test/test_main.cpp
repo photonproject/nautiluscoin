@@ -1,12 +1,16 @@
-#include "nautiluscoin-config.h"
+// Copyright (c) 2009-2014 The Nautiluscoin developers
+// Distributed under the MIT software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #if defined(HAVE_CONFIG_H)
-#include "nautiluscoin-config.h"
+#include "config/nautiluscoin-config.h"
 #endif
+
+#include "uritests.h"
 
 #ifdef ENABLE_WALLET
 #include "paymentservertests.h"
 #endif
-#include "uritests.h"
 
 #include <QCoreApplication>
 #include <QObject>

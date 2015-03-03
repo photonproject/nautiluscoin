@@ -2,8 +2,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef QVALIDATEDLINEEDIT_H
-#define QVALIDATEDLINEEDIT_H
+#ifndef NAUTILUSCOIN_QT_QVALIDATEDLINEEDIT_H
+#define NAUTILUSCOIN_QT_QVALIDATEDLINEEDIT_H
 
 #include <QLineEdit>
 
@@ -36,4 +36,4 @@ private slots:
     void checkValidity();
 };
 
-#endif // QVALIDATEDLINEEDIT_H
+#endif // NAUTILUSCOIN_QT_QVALIDATEDLINEEDIT_H

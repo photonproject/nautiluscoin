@@ -47,7 +47,7 @@ md2k7
 * Designer: md2k7
 * License: You are free to do with these icons as you wish, including selling, copying, modifying etc.
 * License: MIT
-* Site: [https://bitcointalk.org/index.php?topic=15276.0](https://bitcointalk.org/index.php?topic=15276.0)
+* Site: [https://nautiluscointalk.org/index.php?topic=15276.0](https://nautiluscointalk.org/index.php?topic=15276.0)
 
 ### Assets Used
 	src/qt/res/icons/transaction*.png
@@ -78,13 +78,13 @@ Everaldo (Everaldo Coelho)
 ### Assets Used
 	scripts/img/reload.xcf (modified), src/qt/res/movies/*.png
 
-[Vignoni David](http://www.oxygen-icons.org)
+[Vignoni David](http://techbase.kde.org/Projects/Oxygen)
 -----------------------
 
 ### Info
 * Designer: Vignoni David
 * License: Oxygen icon theme is dual licensed. You may copy it under the Creative Common Attribution-ShareAlike 3.0 License or the GNU Library General Public License.
-* Site: [http://www.oxygen-icons.org](http://www.oxygen-icons.org)
+* Site: [http://techbase.kde.org/Projects/Oxygen](http://techbase.kde.org/Projects/Oxygen)
 
 ### Assets Used
 	src/qt/res/icons/debugwindow.png
@@ -100,5 +100,4 @@ Jonas Schnelli
 	src/qt/res/icons/nautiluscoin.icns, src/qt/res/src/nautiluscoin.svg,
 	src/qt/res/src/nautiluscoin.ico, src/qt/res/src/nautiluscoin.png,
 	src/qt/res/src/nautiluscoin_testnet.png, docs/nautiluscoin_logo_doxygen.png,
-	src/qt/res/icons/toolbar.png, src/qt/res/icons/toolbar_testnet.png,
 	src/qt/res/images/splash.png, src/qt/res/images/splash_testnet.png

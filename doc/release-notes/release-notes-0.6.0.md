@@ -1,5 +1,5 @@
 Nautiluscoin version 0.6.0 is now available for download at:
-http://sourceforge.net/projects/bitcoin/files/Bitcoin/bitcoin-0.6.0/test/
+http://sourceforge.net/projects/nautiluscoin/files/Nautiluscoin/nautiluscoin-0.6.0/test/
 
 This release includes more than 20 language localizations.
 More translations are welcome; join the
@@ -7,13 +7,13 @@ project at Transifex to help:
 https://www.transifex.net/projects/p/nautiluscoin/
 
 Please report bugs using the issue tracker at github:
-https://github.com/bitcoin/bitcoin/issues
+https://github.com/nautiluscoin/nautiluscoin/issues
 
 Project source code is hosted at github; we are no longer
 distributing .tar.gz files here, you can get them
 directly from github:
-https://github.com/bitcoin/bitcoin/tarball/v0.6.0  # .tar.gz
-https://github.com/bitcoin/bitcoin/zipball/v0.6.0  # .zip
+https://github.com/nautiluscoin/nautiluscoin/tarball/v0.6.0  # .tar.gz
+https://github.com/nautiluscoin/nautiluscoin/zipball/v0.6.0  # .zip
 
 For Ubuntu users, there is a ppa maintained by Matt Corallo which
 you can add to your system so that it will automatically keep
@@ -30,7 +30,7 @@ because database writes are queued to speed up download
 time.
 
 
-NEW FEATURES SINCE BITCOIN VERSION 0.5
+NEW FEATURES SINCE NAUTILUSCOIN VERSION 0.5
 
 Initial network synchronization should be much faster
 (one or two hours on a typical machine instead of ten or more

@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <openssl/bn.h>
+#include <utilstrencodings.h>
 
 /** Errors thrown by the bignum class */
 class bignum_error : public std::runtime_error

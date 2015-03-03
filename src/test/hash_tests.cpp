@@ -1,7 +1,9 @@
-
+// Copyright (c) 2013 The Nautiluscoin Core developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "hash.h"
-#include "util.h"
+#include "utilstrencodings.h"
 
 #include <vector>
 

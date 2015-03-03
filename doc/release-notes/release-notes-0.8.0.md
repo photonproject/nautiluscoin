@@ -1,11 +1,11 @@
 Nautiluscoin-Qt version 0.8.0 is now available from:
-  http://sourceforge.net/projects/bitcoin/files/Bitcoin/bitcoin-0.8.0/
+  http://sourceforge.net/projects/nautiluscoin/files/Nautiluscoin/nautiluscoin-0.8.0/
 
 This is a major release designed to improve performance and handle the
 increasing volume of transactions on the network.
 
 Please report bugs using the issue tracker at github:
-  https://github.com/bitcoin/bitcoin/issues
+  https://github.com/nautiluscoin/nautiluscoin/issues
 
 How to Upgrade
 --------------

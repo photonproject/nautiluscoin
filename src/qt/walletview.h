@@ -2,8 +2,10 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef WALLETVIEW_H
-#define WALLETVIEW_H
+#ifndef NAUTILUSCOIN_QT_WALLETVIEW_H
+#define NAUTILUSCOIN_QT_WALLETVIEW_H
+
+#include "amount.h"
 
 #include <QStackedWidget>
 
@@ -18,6 +20,7 @@ class WalletModel;
 
 QT_BEGIN_NAMESPACE
 class QModelIndex;
+class QProgressDialog;
 QT_END_NAMESPACE
 
 /*
@@ -60,6 +63,8 @@ private:
 
     TransactionView *transactionView;
 
+    QProgressDialog *progressDialog;
+
 public slots:
     /** Switch to overview (home) page */
     void gotoOverviewPage();
@@ -97,6 +102,9 @@ public slots:
     /** Re-emit encryption status signal */
     void updateEncryptionStatus();
 
+    /** Show progress dialog e.g. for rescan */
+    void showProgress(const QString &title, int nProgress);
+
 signals:
     /** Signal that we want to show the main window */
     void showNormalIfMinimized();
@@ -105,7 +113,7 @@ signals:
     /** Encryption status of wallet changed */
     void encryptionStatusChanged(int status);
     /** Notify that a new transaction appeared */
-    void incomingTransaction(const QString& date, int unit, qint64 amount, const QString& type, const QString& address);
+    void incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address);
 };
 
-#endif // WALLETVIEW_H
+#endif // NAUTILUSCOIN_QT_WALLETVIEW_H

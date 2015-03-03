@@ -1,5 +1,5 @@
 Nautiluscoin version 0.5.1 is now available for download at:
-http://sourceforge.net/projects/bitcoin/files/Bitcoin/bitcoin-0.5.1/
+http://sourceforge.net/projects/nautiluscoin/files/Nautiluscoin/nautiluscoin-0.5.1/
 
 This is a bugfix-only release.
 
@@ -9,13 +9,13 @@ More translations are welcome; join the project at Transifex if you can help:
 https://www.transifex.net/projects/p/nautiluscoin/
 
 Please report bugs using the issue tracker at github:
-https://github.com/bitcoin/bitcoin/issues
+https://github.com/nautiluscoin/nautiluscoin/issues
 
 Project source code is hosted at github; we are no longer
 distributing .tar.gz files here, you can get them
 directly from github:
-https://github.com/bitcoin/bitcoin/tarball/v0.5.1  # .tar.gz
-https://github.com/bitcoin/bitcoin/zipball/v0.5.1  # .zip
+https://github.com/nautiluscoin/nautiluscoin/tarball/v0.5.1  # .tar.gz
+https://github.com/nautiluscoin/nautiluscoin/zipball/v0.5.1  # .zip
 
 For Ubuntu users, there is a new ppa maintained by Matt Corallo which
 you can add to your system so that it will automatically keep

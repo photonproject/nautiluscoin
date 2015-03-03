@@ -2,8 +2,10 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef OPTIONSMODEL_H
-#define OPTIONSMODEL_H
+#ifndef NAUTILUSCOIN_QT_OPTIONSMODEL_H
+#define NAUTILUSCOIN_QT_OPTIONSMODEL_H
+
+#include "amount.h"
 
 #include <QAbstractListModel>
 
@@ -32,15 +34,14 @@ public:
         ProxyUse,               // bool
         ProxyIP,                // QString
         ProxyPort,              // int
-        ProxySocksVersion,      // int
-        Fee,                    // qint64
         DisplayUnit,            // NautiluscoinUnits::Unit
-        DisplayAddresses,       // bool
+        ThirdPartyTxUrls,       // QString
         Language,               // QString
         CoinControlFeatures,    // bool
         ThreadsScriptVerif,     // int
         DatabaseCache,          // int
         SpendZeroConfChange,    // bool
+        Listen,                 // bool
         OptionIDRowCount,
     };
 
@@ -50,12 +51,14 @@ public:
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
     bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
+    /** Updates current unit in memory, settings and emits displayUnitChanged(newUnit) signal */
+    void setDisplayUnit(const QVariant &value);
 
     /* Explicit getters */
     bool getMinimizeToTray() { return fMinimizeToTray; }
     bool getMinimizeOnClose() { return fMinimizeOnClose; }
     int getDisplayUnit() { return nDisplayUnit; }
-    bool getDisplayAddresses() { return bDisplayAddresses; }
+    QString getThirdPartyTxUrls() { return strThirdPartyTxUrls; }
     bool getProxySettings(QNetworkProxy& proxy) const;
     bool getCoinControlFeatures() { return fCoinControlFeatures; }
     const QString& getOverriddenByCommandLine() { return strOverriddenByCommandLine; }
@@ -70,15 +73,17 @@ private:
     bool fMinimizeOnClose;
     QString language;
     int nDisplayUnit;
-    bool bDisplayAddresses;
+    QString strThirdPartyTxUrls;
     bool fCoinControlFeatures;
     /* settings that were overriden by command-line */
     QString strOverriddenByCommandLine;
 
+    /// Add option to list of GUI options overridden through command line/config file
+    void addOverriddenOption(const std::string &option);
+
 signals:
     void displayUnitChanged(int unit);
-    void transactionFeeChanged(qint64);
     void coinControlFeaturesChanged(bool);
 };
 
-#endif // OPTIONSMODEL_H
+#endif // NAUTILUSCOIN_QT_OPTIONSMODEL_H

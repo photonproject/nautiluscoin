@@ -1,6 +1,6 @@
-ACLOCAL_AMFLAGS = -I src/m4
+ACLOCAL_AMFLAGS = -I build-aux/m4
 SUBDIRS = src
-.PHONY: deploy
+.PHONY: deploy FORCE
 
 GZIP_ENV="-9n"
 
@@ -15,6 +15,7 @@ OSX_DEPLOY_SCRIPT=$(top_srcdir)/contrib/macdeploy/macdeployqtplus
 OSX_FANCY_PLIST=$(top_srcdir)/contrib/macdeploy/fancy.plist
 OSX_INSTALLER_ICONS=$(top_srcdir)/src/qt/res/icons/nautiluscoin.icns
 OSX_PLIST=$(top_srcdir)/share/qt/Info.plist #not installed
+OSX_QT_TRANSLATIONS = da,de,es,hu,ru,uk,zh_CN,zh_TW
 
 DIST_DOCS = $(wildcard doc/*.md) $(wildcard doc/release-notes/*.md)
 
@@ -24,7 +25,10 @@ WINDOWS_PACKAGING = $(top_srcdir)/share/pixmaps/nautiluscoin.ico \
   $(top_srcdir)/doc/README_windows.txt
 
 OSX_PACKAGING = $(OSX_DEPLOY_SCRIPT) $(OSX_FANCY_PLIST) $(OSX_INSTALLER_ICONS) \
-  $(top_srcdir)/contrib/macdeploy/background.png
+  $(top_srcdir)/contrib/macdeploy/background.png \
+  $(top_srcdir)/contrib/macdeploy/DS_Store \
+  $(top_srcdir)/contrib/macdeploy/detached-sig-apply.sh \
+  $(top_srcdir)/contrib/macdeploy/detached-sig-create.sh
 
 COVERAGE_INFO = baseline_filtered_combined.info baseline.info block_test.info \
   leveldb_baseline.info test_nautiluscoin_filtered.info total_coverage.info \
@@ -33,7 +37,8 @@ COVERAGE_INFO = baseline_filtered_combined.info baseline.info block_test.info \
 
 dist-hook:
 	-$(MAKE) -C $(top_distdir)/src/leveldb clean
-	-$(GIT) archive --format=tar HEAD -- src/version.cpp | $(AMTAR) -C $(top_distdir) -xf -
+	-$(MAKE) -C $(top_distdir)/src/secp256k1 distclean
+	-$(GIT) archive --format=tar HEAD -- src/clientversion.cpp | $(AMTAR) -C $(top_distdir) -xf -
 
 distcheck-hook:
 	$(MKDIR_P) $(top_distdir)/_build/src/leveldb
@@ -43,16 +48,16 @@ distcheck-hook:
 distcleancheck:
 	@:
 
-$(NAUTILUSCOIN_WIN_INSTALLER): $(NAUTILUSCOIND_BIN) $(NAUTILUSCOIN_QT_BIN) $(NAUTILUSCOIN_CLI_BIN)
+$(NAUTILUSCOIN_WIN_INSTALLER): all-recursive
 	$(MKDIR_P) $(top_builddir)/release
-	$(INSTALL_STRIP_PROGRAM) $(NAUTILUSCOIND_BIN) $(top_builddir)/release
-	$(INSTALL_STRIP_PROGRAM) $(NAUTILUSCOIN_QT_BIN) $(top_builddir)/release
-	$(INSTALL_STRIP_PROGRAM) $(NAUTILUSCOIN_CLI_BIN) $(top_builddir)/release
+	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(NAUTILUSCOIND_BIN) $(top_builddir)/release
+	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(NAUTILUSCOIN_QT_BIN) $(top_builddir)/release
+	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(NAUTILUSCOIN_CLI_BIN) $(top_builddir)/release
 	@test -f $(MAKENSIS) && $(MAKENSIS) $(top_builddir)/share/setup.nsi || \
 	  echo error: could not build $@
 
-$(NAUTILUSCOIND_BIN) $(NAUTILUSCOIN_QT_BIN) $(NAUTILUSCOIN_CLI_BIN):
-	make -C $(dir $@) $(notdir $@)
+$(if $(findstring src/,$(MAKECMDGOALS)),$(MAKECMDGOALS), none): FORCE
+	$(MAKE) -C src $(patsubst src/%,%,$@)
 
 $(OSX_APP)/Contents/PkgInfo:
 	$(MKDIR_P) $(@D)
@@ -64,23 +69,49 @@ $(OSX_APP)/Contents/Resources/empty.lproj:
 
 $(OSX_APP)/Contents/Info.plist: $(OSX_PLIST)
 	$(MKDIR_P) $(@D)
-	$(INSTALL) $< $@
+	$(INSTALL_DATA) $< $@
 
 $(OSX_APP)/Contents/Resources/nautiluscoin.icns: $(OSX_INSTALLER_ICONS)
 	$(MKDIR_P) $(@D)
-	$(INSTALL) $< $@
+	$(INSTALL_DATA) $< $@
 
 $(OSX_APP)/Contents/MacOS/Nautiluscoin-Qt: $(NAUTILUSCOIN_QT_BIN)
 	$(MKDIR_P) $(@D)
-	$(INSTALL_STRIP_PROGRAM)  $< $@
+	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM)  $< $@
 
 OSX_APP_BUILT=$(OSX_APP)/Contents/PkgInfo $(OSX_APP)/Contents/Resources/empty.lproj \
   $(OSX_APP)/Contents/Resources/nautiluscoin.icns $(OSX_APP)/Contents/Info.plist \
   $(OSX_APP)/Contents/MacOS/Nautiluscoin-Qt
 
+if BUILD_DARWIN
 $(OSX_DMG): $(OSX_APP_BUILT) $(OSX_PACKAGING)
-	$(OSX_DEPLOY_SCRIPT) $(OSX_APP) -add-qt-tr da,de,es,hu,ru,uk,zh_CN,zh_TW -dmg -fancy $(OSX_FANCY_PLIST) -verbose 2
+	$(OSX_DEPLOY_SCRIPT) $(OSX_APP) -add-qt-tr $(OSX_QT_TRANSLATIONS) -translations-dir=$(QT_TRANSLATION_DIR) -dmg -fancy $(OSX_FANCY_PLIST) -verbose 2
 
+deploydir: $(OSX_DMG)
+else
+APP_DIST_DIR=$(top_builddir)/dist
+APP_DIST_EXTRAS=$(APP_DIST_DIR)/.background/background.png $(APP_DIST_DIR)/.DS_Store $(APP_DIST_DIR)/Applications
+
+$(APP_DIST_DIR)/Applications:
+	@rm -f $@
+	@cd $(@D); $(LN_S) /Applications $(@F)
+
+$(APP_DIST_EXTRAS): $(APP_DIST_DIR)/$(OSX_APP)/Contents/MacOS/Nautiluscoin-Qt
+
+$(OSX_DMG): $(APP_DIST_EXTRAS)
+	$(GENISOIMAGE) -no-cache-inodes -D -l -probe -V "Nautiluscoin-Qt" -no-pad -r -apple -o $@ dist
+
+$(APP_DIST_DIR)/.background/background.png:
+	$(MKDIR_P) $(@D)
+	$(INSTALL) $(top_srcdir)/contrib/macdeploy/background.png $@
+$(APP_DIST_DIR)/.DS_Store:
+	$(INSTALL) $(top_srcdir)/contrib/macdeploy/DS_Store $@
+
+$(APP_DIST_DIR)/$(OSX_APP)/Contents/MacOS/Nautiluscoin-Qt: $(OSX_APP_BUILT) $(OSX_PACKAGING)
+	INSTALLNAMETOOL=$(INSTALLNAMETOOL)  OTOOL=$(OTOOL) STRIP=$(STRIP) $(OSX_DEPLOY_SCRIPT) $(OSX_APP) -translations-dir=$(QT_TRANSLATION_DIR) -add-qt-tr $(OSX_QT_TRANSLATIONS) -verbose 2
+
+deploydir: $(APP_DIST_EXTRAS)
+endif
 
 if TARGET_DARWIN
 appbundle: $(OSX_APP_BUILT)
@@ -89,6 +120,15 @@ endif
 if TARGET_WINDOWS
 deploy: $(NAUTILUSCOIN_WIN_INSTALLER)
 endif
+
+$(NAUTILUSCOIN_QT_BIN): FORCE
+	$(MAKE) -C src qt/$(@F)
+
+$(NAUTILUSCOIND_BIN): FORCE
+	$(MAKE) -C src $(@F)
+
+$(NAUTILUSCOIN_CLI_BIN): FORCE
+	$(MAKE) -C src $(@F)
 
 if USE_LCOV
 
@@ -147,14 +187,14 @@ endif
 if USE_COMPARISON_TOOL
 check-local:
 	$(MKDIR_P) qa/tmp
-	@qa/pull-tester/run-nautiluscoind-for-test.sh $(JAVA) -jar $(JAVA_COMPARISON_TOOL) qa/tmp/compTool $(COMPARISON_TOOL_REORG_TESTS)
+	@qa/pull-tester/run-nautiluscoind-for-test.sh $(JAVA) -jar $(JAVA_COMPARISON_TOOL) qa/tmp/compTool $(COMPARISON_TOOL_REORG_TESTS) 2>&1
 endif
 
-EXTRA_DIST = $(top_srcdir)/share/genbuild.sh qa/pull-tester/pull-tester.sh $(DIST_DOCS) $(WINDOWS_PACKAGING) $(OSX_PACKAGING)
+EXTRA_DIST = $(top_srcdir)/share/genbuild.sh qa/pull-tester/rpc-tests.sh qa/pull-tester/run-nautiluscoin-cli qa/rpc-tests $(DIST_DOCS) $(WINDOWS_PACKAGING) $(OSX_PACKAGING)
 
-CLEANFILES = $(OSX_DMG) $(OSX_APP) $(NAUTILUSCOINNAUTILUSCOIN_WIN_INSTALLER)
+CLEANFILES = $(OSX_DMG) $(NAUTILUSCOIN_WIN_INSTALLER)
 
 .INTERMEDIATE: $(COVERAGE_INFO)
 
 clean-local:
-	rm -rf test_nautiluscoin.coverage/ total.coverage/
+	rm -rf test_nautiluscoin.coverage/ total.coverage/ $(OSX_APP)

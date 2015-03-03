@@ -1,10 +1,10 @@
 Nautiluscoin version 0.7.2 is now available from:
-  http://sourceforge.net/projects/bitcoin/files/Bitcoin/bitcoin-0.7.2
+  http://sourceforge.net/projects/nautiluscoin/files/Nautiluscoin/nautiluscoin-0.7.2
 
 This is a bug-fix minor release.
 
 Please report bugs using the issue tracker at github:
-  https://github.com/bitcoin/bitcoin/issues
+  https://github.com/nautiluscoin/nautiluscoin/issues
 
 How to Upgrade
 --------------

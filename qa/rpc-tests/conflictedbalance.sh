@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Copyright (c) 2014 The Nautiluscoin Core developers
+# Distributed under the MIT software license, see the accompanying
+# file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 # Test marking of spent outputs
 
@@ -15,13 +18,14 @@
 if [ $# -lt 1 ]; then
         echo "Usage: $0 path_to_binaries"
         echo "e.g. $0 ../../src"
+        echo "Env vars NAUTILUSCOIND and NAUTILUSCOINCLI may be used to specify the exact binaries used"
         exit 1
 fi
 
 set -f
 
-NAUTILUSCOIND=${1}/nautiluscoind
-CLI=${1}/nautiluscoin-cli
+NAUTILUSCOIND=${NAUTILUSCOIND:-${1}/nautiluscoind}
+CLI=${NAUTILUSCOINCLI:-${1}/nautiluscoin-cli}
 
 DIR="${BASH_SOURCE%/*}"
 SENDANDWAIT="${DIR}/send.sh"

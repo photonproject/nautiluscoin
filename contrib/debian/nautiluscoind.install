@@ -1,1 +1,2 @@
-src/nautiluscoind usr/bin
+usr/local/bin/nautiluscoind usr/bin
+usr/local/bin/nautiluscoin-cli usr/bin

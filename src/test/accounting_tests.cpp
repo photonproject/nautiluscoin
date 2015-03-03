@@ -1,4 +1,6 @@
-
+// Copyright (c) 2012-2014 The Nautiluscoin Core developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "wallet.h"
 #include "walletdb.h"
@@ -13,7 +15,7 @@ extern CWallet* pwalletMain;
 BOOST_AUTO_TEST_SUITE(accounting_tests)
 
 static void
-GetResults(CWalletDB& walletdb, std::map<int64_t, CAccountingEntry>& results)
+GetResults(CWalletDB& walletdb, std::map<CAmount, CAccountingEntry>& results)
 {
     std::list<CAccountingEntry> aes;
 
@@ -32,7 +34,7 @@ BOOST_AUTO_TEST_CASE(acc_orderupgrade)
     std::vector<CWalletTx*> vpwtx;
     CWalletTx wtx;
     CAccountingEntry ae;
-    std::map<int64_t, CAccountingEntry> results;
+    std::map<CAmount, CAccountingEntry> results;
 
     LOCK(pwalletMain->cs_wallet);
 
@@ -81,13 +83,21 @@ BOOST_AUTO_TEST_CASE(acc_orderupgrade)
 
 
     wtx.mapValue["comment"] = "y";
-    --wtx.nLockTime;  // Just to change the hash :)
+    {
+        CMutableTransaction tx(wtx);
+        --tx.nLockTime;  // Just to change the hash :)
+        *static_cast<CTransaction*>(&wtx) = CTransaction(tx);
+    }
     pwalletMain->AddToWallet(wtx);
     vpwtx.push_back(&pwalletMain->mapWallet[wtx.GetHash()]);
     vpwtx[1]->nTimeReceived = (unsigned int)1333333336;
 
     wtx.mapValue["comment"] = "x";
-    --wtx.nLockTime;  // Just to change the hash :)
+    {
+        CMutableTransaction tx(wtx);
+        --tx.nLockTime;  // Just to change the hash :)
+        *static_cast<CTransaction*>(&wtx) = CTransaction(tx);
+    }
     pwalletMain->AddToWallet(wtx);
     vpwtx.push_back(&pwalletMain->mapWallet[wtx.GetHash()]);
     vpwtx[2]->nTimeReceived = (unsigned int)1333333329;
